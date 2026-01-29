@@ -1,0 +1,63 @@
+services:
+
+  devenv-8.4.6:
+    platform: linux/amd64
+    build:
+      dockerfile: Dockerfile.dev
+      args:
+        MYSQL_VERSION: "8.4.6"
+    volumes:
+      - "./src/:/development/mysql/plugin/mysqldays/"
+
+  mysql8.4:
+    platform: linux/amd64
+    image: mysql:8.4.6
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=mypass
+    volumes:
+      - "./dockerfiles/my_custom.cnf:/etc/mysql/conf.d/my_custom.cnf"
+      - "./artifacts/8.4.6/:/my_plugins/"
+    healthcheck:
+      test: "mysqladmin ping -u root -p$${MYSQL_ROOT_PASSWORD}"
+      interval: 2s
+      retries: 20
+
+  mysqld_exporter:
+    platform: linux/amd64
+    image: quay.io/prometheus/mysqld-exporter
+    container_name: mysqld-exporter
+    command:
+      --mysqld.address=mysql8.4:3306 --mysqld.username=root
+    environment:
+      - MYSQLD_EXPORTER_PASSWORD=mypass
+    ports:
+      - 9104:9104
+    links:
+      - mysql8.4
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:v3.8.1
+    volumes:
+      - "./dockerfiles/prometheus.yml:/etc/prometheus/prometheus.yml"
+    ports:
+      - 9090:9090
+    links:
+      - mysqld_exporter
+
+  grafana:
+    platform: linux/amd64
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    environment:
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./dockerfiles/grafana/datasource/:/etc/grafana/provisioning/datasources/
+      - ./dockerfiles/grafana/dashboards/:/etc/grafana/provisioning/dashboards/

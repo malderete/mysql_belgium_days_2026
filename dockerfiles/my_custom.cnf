@@ -1,0 +1,2 @@
+[mysqld]
+plugin_dir = /my_plugins/
