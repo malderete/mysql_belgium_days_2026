@@ -44,9 +44,6 @@ RUN wget https://cdn.mysql.com/Downloads/MySQL-${MYSQL_VERSION%.*}/mysql-$MYSQL_
     rm mysql-$MYSQL_VERSION.tar.gz && \
     ln -sf mysql-$MYSQL_VERSION mysql
 
-#RUN mkdir -p /development/mysql/plugin/mysqldays/
-
-#COPY src/ /development/mysql/plugin/mysqldays/
 
 WORKDIR /development/mysql/bld
 
