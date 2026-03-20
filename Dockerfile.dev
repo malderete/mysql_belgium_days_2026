@@ -44,6 +44,12 @@ RUN wget https://cdn.mysql.com/Downloads/MySQL-${MYSQL_VERSION%.*}/mysql-$MYSQL_
     rm mysql-$MYSQL_VERSION.tar.gz && \
     ln -sf mysql-$MYSQL_VERSION mysql
 
+# Copy plugins code
+RUN mkdir -p /development/mysql/plugin/mysqldays/
+COPY ./src/mysqldays.cc ./src/CMakeLists.txt /development/mysql/plugin/mysqldays/
+
+RUN mkdir -p /development/mysql/plugin/mysqlcrasher/
+COPY ./src_crasher/mysqlcrasher.cc ./src_crasher/CMakeLists.txt /development/mysql/plugin/mysqlcrasher
 
 WORKDIR /development/mysql/bld
 

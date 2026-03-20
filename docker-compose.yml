@@ -6,8 +6,6 @@ services:
       dockerfile: Dockerfile.dev
       args:
         MYSQL_VERSION: "8.4.6"
-    volumes:
-      - "./src/:/development/mysql/plugin/mysqldays/"
 
   mysql8.4:
     platform: linux/amd64
@@ -15,9 +13,11 @@ services:
     restart: unless-stopped
     environment:
       - MYSQL_ROOT_PASSWORD=mypass
+      - MYSQL_DATABASE=amsdb
     volumes:
       - "./dockerfiles/my_custom.cnf:/etc/mysql/conf.d/my_custom.cnf"
       - "./artifacts/8.4.6/:/my_plugins/"
+      - "./db_init:/docker-entrypoint-initdb.d"
     healthcheck:
       test: "mysqladmin ping -u root -p$${MYSQL_ROOT_PASSWORD}"
       interval: 2s
